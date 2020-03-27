@@ -87,8 +87,8 @@ export default function App() {
     }
     return (
       <NavigationContainer>
-        <StatusBar hidden />
         <Stack.Navigator>
+          <StatusBar hidden />
           {/* <Stack.Screen
               name="Splash"
               component={SplashScreen}
