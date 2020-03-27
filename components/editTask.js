@@ -15,28 +15,22 @@ import {TextInput as RNTextInput} from 'react-native-gesture-handler';
 import {TextInput as PaperTextInput} from 'react-native-paper';
 import ToggleSwitch from 'toggle-switch-react-native';
 import DatePicker from 'react-native-datepicker';
+// import {DatePicker} from 'react-native-ui-xg';
 
-import {connect, useSelector} from 'react-redux';
+import {connect} from 'react-redux';
 
-import {createTask} from '../actions/task';
+import {editTask} from '../actions/task';
 
-const CreateTask = ({navigation, reduxCreateTask}) => {
-  const [title, setTitle] = useState('');
-  const [desc, setDesc] = useState('');
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
-  const [important, setImportant] = useState(false);
-  const users = useSelector(state => state.authReducer);
-  var loggedUser,
-    i = 0;
-  for (i in users) {
-    console.log(users[i]);
-    if (users[i].loggedIn) {
-      loggedUser = users[i].username;
-      break;
-    }
-  }
-  console.log(loggedUser);
+const EditTask = ({navigation, reduxEditTask, route}) => {
+  const {item} = route.params;
+  const [title, setTitle] = useState(item.title);
+  const [desc, setDesc] = useState(item.desc);
+  const [startDate, setStartDate] = useState(item.startDate);
+  const [endDate, setEndDate] = useState(item.endDate);
+  const [important, setImportant] = useState(item.important);
+
+  const id = item.id;
+  const completed = item.completed;
 
   return (
     <ScrollView style={styles.container}>
@@ -57,8 +51,8 @@ const CreateTask = ({navigation, reduxCreateTask}) => {
           <View style={styles.innerInputArea}>
             <PaperTextInput
               style={styles.textInput}
-              placeholder="Description"
               multiline
+              placeholder="Description"
               value={desc}
               onChangeText={e => setDesc(e)}
             />
@@ -105,15 +99,16 @@ const CreateTask = ({navigation, reduxCreateTask}) => {
           <Button
             title="Save"
             onPress={() => {
-              reduxCreateTask(
-                loggedUser,
+              reduxEditTask(
+                id,
+                'Tim',
                 title,
                 desc,
                 startDate,
                 endDate,
                 important,
+                completed,
               );
-              console.log(loggedUser);
               navigation.goBack();
             }}
           />
@@ -167,20 +162,42 @@ const mapStateToProps = state => {
   // Redux Store --> Component
   return {
     user: state.authReducer.user,
+    id: state.taskReducer.id,
     title: state.taskReducer.title,
     desc: state.taskReducer.desc,
     startDate: state.taskReducer.startDate,
     endDate: state.taskReducer.endDate,
     important: state.taskReducer.important,
+    completed: state.taskReducer.completed,
   };
 };
 
 const mapDispatchToProps = dispatch => {
   // Action
   return {
-    reduxCreateTask: (user, title, desc, startDate, endDate, important) =>
-      dispatch(createTask(user, title, desc, startDate, endDate, important)),
+    reduxEditTask: (
+      id,
+      user,
+      title,
+      desc,
+      startDate,
+      endDate,
+      important,
+      completed,
+    ) =>
+      dispatch(
+        editTask(
+          id,
+          user,
+          title,
+          desc,
+          startDate,
+          endDate,
+          important,
+          completed,
+        ),
+      ),
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(CreateTask);
+export default connect(mapStateToProps, mapDispatchToProps)(EditTask);
