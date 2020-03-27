@@ -1,4 +1,5 @@
-export const getUser = user => ({
-    type: 'GET_USER',
-    payload: user,
+export const login = (user = '', trueFalse) => ({
+  type: 'LOGIN',
+  user: user,
+  trueFalse: trueFalse,
 });

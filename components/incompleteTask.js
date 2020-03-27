@@ -1,16 +1,17 @@
-/* eslint-disable prettier/prettier */
 /* eslint-disable no-undef */
 /* eslint-disable no-alert */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable no-unused-vars */
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   TouchableOpacity,
   TouchableHighlight,
   View,
   Text,
+  List,
 } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import {SwipeListView} from 'react-native-swipe-list-view';
 import {useSelector} from 'react-redux';
 import {connect} from 'react-redux';
@@ -25,97 +26,90 @@ const closeRow = (rowMap, rowKey) => {
   }
 };
 
-const TodoList = ({navigation, reduxDeleteTask, reduxMarkTaskAsDone}) => {
+const OngoingTask = ({navigation, reduxDeleteTask, reduxMarkTaskAsDone}) => {
   const todos = useSelector(state => state.taskReducer);
-  let i = 0,
-    j = 0;
+  //   console.log('completed task: ', todos);
+  let i = 0;
+  let taskArray = [];
   for (i in todos) {
-    !todos[i].completed ? j++ : (j += 0);
+    if (!todos[i].completed) {
+      taskArray.push(todos[i]);
+    }
+  }
+  console.table(taskArray);
+  if (taskArray.length === 0) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.titleContainer}>
+          <TouchableHighlight>
+            <Text>You do not have any ongoing task</Text>
+          </TouchableHighlight>
+        </View>
+      </View>
+    );
   }
   return (
     <View style={styles.container}>
       <View style={styles.taskCountContainer}>
-        <Text style={{textAlign: 'right'}}>You have {j} ongoing task</Text>
+        <Text style={{textAlign: 'right'}}>
+          You have {taskArray.length} ongoing task
+        </Text>
       </View>
-      {todos.length === 0 ? (
-        <View style={styles.titleContainer}>
-          <TouchableHighlight>
-            <Text>You do not have any task</Text>
-          </TouchableHighlight>
-        </View>
-      ) : (
-        <SwipeListView
-          data={todos}
-          renderItem={({item}) => (
-            <TouchableHighlight
-              style={[
-                item.important && !item.completed
-                  ? styles.impRowFront
-                  : [item.completed ? styles.comRowFront : styles.defRowFront],
-              ]}
-              underlayColor={'#FFF'}
-              onPress={() => {
-                navigation.navigate('EditTask', {item});
-              }}>
-              <View
-                style={
-                  (styles.taskContainer,
-                  {
-                    padding: 20,
-                    width: '100%',
-                  })
-                }>
-                <Text
-                  numberOfLines={1}
-                  style={
-                    (styles.taskTitle,
-                    {
-                      textDecorationLine: item.completed
-                        ? 'line-through'
-                        : 'none',
-                    })
-                  }>
-                  {item.title}
-                </Text>
-                <Text
-                  numberOfLines={1}
-                  style={
-                    (styles.taskDesc,
-                    {
-                      textDecorationLine: item.completed
-                        ? 'line-through'
-                        : 'none',
-                    })
-                  }>
-                  {item.desc}
-                </Text>
-              </View>
-            </TouchableHighlight>
-          )}
-          renderHiddenItem={({item}, rowMap, rowKey) => (
-            <View style={styles.rowBack}>
-              <TouchableOpacity
-                style={styles.backLeftBtn}
-                onPress={() => {
-                  closeRow(rowMap, rowKey);
-                  reduxMarkTaskAsDone(item.id);
-                }}>
-                {item.completed ? <Text>Undone</Text> : <Text>Done</Text>}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.backRightBtn}
-                onPress={() => {
-                  reduxDeleteTask(item.id);
-                }}>
-                <Text>Delete</Text>
-              </TouchableOpacity>
+      <SwipeListView
+        data={taskArray}
+        renderItem={({item}) => (
+          <TouchableHighlight
+            style={[
+              item.important && !item.completed
+                ? styles.impRowFront
+                : [item.completed ? styles.comRowFront : styles.defRowFront],
+            ]}
+            underlayColor={'#FFF'}
+            onPress={() => {
+              navigation.navigate('EditTask', {item});
+            }}>
+            <View
+              style={
+                (styles.taskContainer,
+                {
+                  textDecorationLine: item.completed ? 'line-through' : 'none',
+                  padding: 20,
+                  fontSize: 14,
+                  width: '100%',
+                })
+              }>
+              <Text numberOfLines={1} style={styles.taskTitle}>
+                {item.title}
+              </Text>
+              <Text numberOfLines={1} style={styles.taskDesc}>
+                {item.desc}
+              </Text>
             </View>
-          )}
-          leftOpenValue={100}
-          rightOpenValue={-100}
-        />
-      )}
+          </TouchableHighlight>
+        )}
+        renderHiddenItem={({item}, rowMap, rowKey) => (
+          <View style={styles.rowBack}>
+            <TouchableOpacity
+              style={styles.backLeftBtn}
+              onPress={() => {
+                closeRow(rowMap, rowKey);
+                reduxMarkTaskAsDone(item.id);
+              }}>
+              {item.completed ? <Text>Undone</Text> : <Text>Done</Text>}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.backRightBtn}
+              onPress={() => {
+                reduxDeleteTask(item.id);
+              }}>
+              <Text>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        leftOpenValue={100}
+        rightOpenValue={-100}
+      />
       <View style={styles.footerInner}>
         <TouchableOpacity
           style={styles.btn}
@@ -132,15 +126,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flex: 1,
   },
-  taskCountContainer: {
-    height: 30,
-    margin: 12,
-    padding: 5,
-  },
   titleContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
+  },
+  taskCountContainer: {
+    height: 30,
+    margin: 12,
+    padding: 5,
   },
   taskContainer: {
     height: 100,
@@ -258,4 +252,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(TodoList);
+export default connect(mapStateToProps, mapDispatchToProps)(OngoingTask);
