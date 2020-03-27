@@ -11,7 +11,8 @@ import {
   KeyboardAvoidingView,
   ScrollView,
 } from 'react-native';
-import {TextInput} from 'react-native-gesture-handler';
+import {TextInput as RNTextInput} from 'react-native-gesture-handler';
+import {TextInput as PaperTextInput} from 'react-native-paper';
 import ToggleSwitch from 'toggle-switch-react-native';
 import DatePicker from 'react-native-datepicker';
 // import {DatePicker} from 'react-native-ui-xg';
@@ -30,7 +31,6 @@ const EditTask = ({navigation, reduxEditTask, route}) => {
 
   const id = item.id;
   const completed = item.completed;
-  console.log('start: ' + startDate + ' end: ' + endDate);
 
   return (
     <ScrollView style={styles.container}>
@@ -38,7 +38,7 @@ const EditTask = ({navigation, reduxEditTask, route}) => {
         <Text>Title</Text>
         <KeyboardAvoidingView style={styles.inputArea} behavior="padding">
           <View style={styles.innerInputArea}>
-            <TextInput
+            <RNTextInput
               style={styles.textInput}
               placeholder="Remind me to..."
               value={title}
@@ -49,8 +49,9 @@ const EditTask = ({navigation, reduxEditTask, route}) => {
         <Text>Description</Text>
         <KeyboardAvoidingView style={styles.inputArea} behavior="padding">
           <View style={styles.innerInputArea}>
-            <TextInput
+            <PaperTextInput
               style={styles.textInput}
+              multiline
               placeholder="Description"
               value={desc}
               onChangeText={e => setDesc(e)}

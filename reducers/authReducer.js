@@ -1,19 +1,36 @@
-const authReducer = (state = [], action) => {
+const INITIAL_STATE = [
+  {username: 'Anonymous', password: '123456', loggedIn: false},
+];
+
+const authReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
     // Login
     case 'LOGIN': {
-      return {
-        // State
+      return state.map(user =>
+        user.username === action.username && user.password === action.password
+          ? {...user, loggedIn: !user.loggedIn}
+          : user,
+      );
+    }
+    case 'REGISTER': {
+      return [
         ...state,
-        // Redux Store
-        user: action.user,
-        loggedIn: action.trueFalse,
-      };
+        {
+          username: action.username,
+          password: action.password,
+          loggedIn: true,
+        },
+      ];
     }
-    // Default
-    default: {
+    case 'LOGOUT': {
+      return state.map(user =>
+        user.username === action.username
+          ? {...user, loggedIn: !user.loggedIn}
+          : user,
+      );
+    }
+    default:
       return state;
-    }
   }
 };
 // Exports

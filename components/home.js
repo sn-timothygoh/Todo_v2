@@ -12,6 +12,8 @@ import {
   Text,
 } from 'react-native';
 import {SwipeListView} from 'react-native-swipe-list-view';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {useSelector} from 'react-redux';
 import {connect} from 'react-redux';
 import {deleteTask, markAsDone} from '../actions/task';
@@ -27,15 +29,32 @@ const closeRow = (rowMap, rowKey) => {
 
 const TodoList = ({navigation, reduxDeleteTask, reduxMarkTaskAsDone}) => {
   const todos = useSelector(state => state.taskReducer);
+  const users = useSelector(state => state.authReducer);
+  var loggedUser;
+  let k = 0;
+  for (k in users) {
+    if (users[k].loggedIn) {
+      loggedUser = users[k].username;
+      break;
+    }
+  }
+
+  let userTask = [],
+    userUndone = 0;
   let i = 0,
     j = 0;
   for (i in todos) {
-    !todos[i].completed ? j++ : (j += 0);
+    todos[i].user === loggedUser ? userTask.push(todos[i]) : null;
+  }
+  for (j in userTask) {
+    !userTask[j].completed ? userUndone++ : null;
   }
   return (
     <View style={styles.container}>
       <View style={styles.taskCountContainer}>
-        <Text style={{textAlign: 'right'}}>You have {j} ongoing task</Text>
+        <Text style={{textAlign: 'right'}}>
+          You have {userUndone} ongoing task
+        </Text>
       </View>
       {todos.length === 0 ? (
         <View style={styles.titleContainer}>
@@ -45,7 +64,7 @@ const TodoList = ({navigation, reduxDeleteTask, reduxMarkTaskAsDone}) => {
         </View>
       ) : (
         <SwipeListView
-          data={todos}
+          data={userTask}
           renderItem={({item}) => (
             <TouchableHighlight
               style={[
@@ -120,7 +139,9 @@ const TodoList = ({navigation, reduxDeleteTask, reduxMarkTaskAsDone}) => {
         <TouchableOpacity
           style={styles.btn}
           onPress={() => navigation.navigate('CreateTask')}>
-          <Text style={styles.btnCreate}>+</Text>
+          {/* <Text style={styles.btnCreate}>+</Text> */}
+          <FontAwesome5 name="plus" size={16} color="white" />
+          {/* <Icon name="plus" size={25} color="white" /> */}
         </TouchableOpacity>
       </View>
     </View>

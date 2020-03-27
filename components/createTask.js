@@ -11,11 +11,12 @@ import {
   KeyboardAvoidingView,
   ScrollView,
 } from 'react-native';
-import {TextInput} from 'react-native-gesture-handler';
+import {TextInput as RNTextInput} from 'react-native-gesture-handler';
+import {TextInput as PaperTextInput} from 'react-native-paper';
 import ToggleSwitch from 'toggle-switch-react-native';
 import DatePicker from 'react-native-datepicker';
 
-import {connect} from 'react-redux';
+import {connect, useSelector} from 'react-redux';
 
 import {createTask} from '../actions/task';
 
@@ -25,6 +26,17 @@ const CreateTask = ({navigation, reduxCreateTask}) => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [important, setImportant] = useState(false);
+  const users = useSelector(state => state.authReducer);
+  var loggedUser,
+    i = 0;
+  for (i in users) {
+    console.log(users[i]);
+    if (users[i].loggedIn) {
+      loggedUser = users[i].username;
+      break;
+    }
+  }
+  console.log(loggedUser);
 
   return (
     <ScrollView style={styles.container}>
@@ -32,7 +44,7 @@ const CreateTask = ({navigation, reduxCreateTask}) => {
         <Text>Title</Text>
         <KeyboardAvoidingView style={styles.inputArea} behavior="padding">
           <View style={styles.innerInputArea}>
-            <TextInput
+            <RNTextInput
               style={styles.textInput}
               placeholder="Remind me to..."
               value={title}
@@ -43,9 +55,10 @@ const CreateTask = ({navigation, reduxCreateTask}) => {
         <Text>Description</Text>
         <KeyboardAvoidingView style={styles.inputArea} behavior="padding">
           <View style={styles.innerInputArea}>
-            <TextInput
+            <PaperTextInput
               style={styles.textInput}
               placeholder="Description"
+              multiline
               value={desc}
               onChangeText={e => setDesc(e)}
             />
@@ -93,13 +106,14 @@ const CreateTask = ({navigation, reduxCreateTask}) => {
             title="Save"
             onPress={() => {
               reduxCreateTask(
-                'Tim',
+                loggedUser,
                 title,
                 desc,
                 startDate,
                 endDate,
                 important,
               );
+              console.log(loggedUser);
               navigation.goBack();
             }}
           />

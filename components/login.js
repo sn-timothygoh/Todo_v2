@@ -1,59 +1,121 @@
-import React from 'react';
-import {connect} from 'react-redux';
-import {Button, StyleSheet, View, AsyncStorage} from 'react-native';
+/* eslint-disable no-shadow */
+/* eslint-disable prettier/prettier */
+import React, {useState} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
+import {connect, useDispatch, useSelector} from 'react-redux';
+import {login, register} from '../actions/auth';
 
-const authContext = React.useMemo(
-  () => ({
-    signIn: async data => {
-      // In a production app, we need to send some data (usually username, password) to server and get a token
-      // We will also need to handle errors if sign in failed
-      // After getting token, we need to persist the token using `AsyncStorage`
-      // In the example, we'll use a dummy token
+const LoginScreen = ({navigation}) => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const users = useSelector(state => state.authReducer);
+  const dispatch = useDispatch();
 
-      dispatch({type: 'SIGN_IN', token: 'dummy-auth-token'});
-    },
-    signOut: () => dispatch({type: 'SIGN_OUT'}),
-    signUp: async data => {
-      // In a production app, we need to send user data to server and get a token
-      // We will also need to handle errors if sign up failed
-      // After getting token, we need to persist the token using `AsyncStorage`
-      // In the example, we'll use a dummy token
+  const handleLogin = (userName, password) => {
+    const checkExist = users.some(user => user.userName === userName);
 
-      dispatch({type: 'SIGN_IN', token: 'dummy-auth-token'});
-    },
-  }),
-  [],
-);
+    if (!checkExist) {
+      if (username !== '' && password !== '')
+        dispatch(register(username, password));
+      else setErrorMsg('Username and Password cannot be blank!');
+    } else {
+      dispatch(login(username, password));
 
-export default function SignInScreen() {
-  const [username, setUsername] = React.useState('');
-  const [password, setPassword] = React.useState('');
+      const valid = users.some(user => user.loggedIn === true);
 
-  const {signIn} = React.useContext(AuthContext);
+      !username
+        ? setErrorMsg('')
+        : !valid
+        ? setErrorMsg('User existed, wrong password')
+        : '';
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <TextInput
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <Button title="Sign in" onPress={() => signIn({username, password})} />
+      <Text style={styles.logo}>LOGIN</Text>
+      <View style={styles.inputView}>
+        <TextInput
+          style={styles.inputText}
+          placeholder="Username"
+          placeholderTextColor="#003f5c"
+          value={username}
+          onChangeText={e => setUsername(e)}
+        />
+      </View>
+      <View style={styles.inputView}>
+        <TextInput
+          secureTextEntry
+          style={styles.inputText}
+          placeholder="Password"
+          placeholderTextColor="#003f5c"
+          value={password}
+          onChangeText={e => setPassword(e)}
+        />
+      </View>
+      <TouchableOpacity
+        style={styles.loginBtn}
+        onPress={() => handleLogin(username, password)}>
+        {errorMsg !== '' && <Text style={styles.text}>{errorMsg}</Text>}
+        <Text style={styles.loginText}>Connect to App</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.loginBtn}
+        onPress={() => dispatch(login('Anonymous', '123456'))}>
+        <Text style={styles.loginText}>Access as Anonymous</Text>
+      </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  logo: {
+    fontWeight: 'bold',
+    fontSize: 50,
+    color: '#0084FF',
+    marginBottom: 40,
+  },
+  inputView: {
+    width: '80%',
+    backgroundColor: '#DDD',
+    borderRadius: 25,
+    height: 50,
+    marginBottom: 20,
+    justifyContent: 'center',
+    padding: 20,
+  },
+  inputText: {
+    height: 50,
+    color: '#000',
+  },
+  loginBtn: {
+    width: '60%',
+    backgroundColor: '#0084FF',
+    borderRadius: 25,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  loginText: {
+    color: '#fff',
+  },
+  errMsg: {
+    color: '#f00',
+  },
 });
+
+export default connect()(LoginScreen);

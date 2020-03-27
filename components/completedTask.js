@@ -26,16 +26,26 @@ const closeRow = (rowMap, rowKey) => {
 
 const CompletedTask = ({navigation, reduxDeleteTask, reduxMarkTaskAsDone}) => {
   const todos = useSelector(state => state.taskReducer);
-  //   console.log('completed task: ', todos);
-  let i = 0;
-  let taskArray = [];
-  for (i in todos) {
-    if (todos[i].completed) {
-      taskArray.push(todos[i]);
+  const users = useSelector(state => state.authReducer);
+  var loggedUser;
+  let k = 0;
+  for (k in users) {
+    if (users[k].loggedIn) {
+      loggedUser = users[k].username;
+      break;
     }
   }
-  console.table(taskArray);
-  if (taskArray.length === 0) {
+  let userTask = [],
+    userDone = [];
+  let i = 0,
+    j = 0;
+  for (i in todos) {
+    todos[i].user === loggedUser ? userTask.push(todos[i]) : null;
+  }
+  for (j in userTask) {
+    userTask[j].completed ? userDone.push(userTask[j]) : null;
+  }
+  if (userDone.length === 0) {
     return (
       <View style={styles.container}>
         <View style={styles.titleContainer}>
@@ -50,11 +60,11 @@ const CompletedTask = ({navigation, reduxDeleteTask, reduxMarkTaskAsDone}) => {
     <View style={styles.container}>
       <View style={styles.taskCountContainer}>
         <Text style={{textAlign: 'right'}}>
-          You have {taskArray.length} completed task
+          You have {userDone.length} completed task
         </Text>
       </View>
       <SwipeListView
-        data={taskArray}
+        data={userDone}
         renderItem={({item}) => (
           <TouchableHighlight
             style={[
