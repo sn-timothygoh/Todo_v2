@@ -79,7 +79,6 @@ export default function App() {
     var loggedUser;
     let i = 0;
     for (i in users) {
-      console.log(users[i]);
       if (users[i].loggedIn) {
         loggedUser = users[i].username;
         break;
@@ -87,8 +86,8 @@ export default function App() {
     }
     return (
       <NavigationContainer>
+        <StatusBar hidden />
         <Stack.Navigator>
-          <StatusBar hidden />
           {/* <Stack.Screen
               name="Splash"
               component={SplashScreen}
@@ -132,7 +131,6 @@ export default function App() {
                     }}
                     title="1"
                     onPress={() => {
-                      console.log(loggedUser);
                       dispatch(logout(loggedUser));
                     }}
                   />

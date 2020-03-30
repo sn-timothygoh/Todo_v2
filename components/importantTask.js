@@ -1,7 +1,3 @@
-/* eslint-disable no-undef */
-/* eslint-disable no-alert */
-/* eslint-disable react-native/no-inline-styles */
-/* eslint-disable no-unused-vars */
 import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
@@ -12,8 +8,8 @@ import {
   List,
 } from 'react-native';
 import {SwipeListView} from 'react-native-swipe-list-view';
-import {useSelector} from 'react-redux';
-import {connect} from 'react-redux';
+import {connect, useSelector, useDispatch} from 'react-redux';
+
 import {deleteTask, markAsDone} from '../actions/task';
 
 console.disableYellowBox = true;
@@ -25,30 +21,39 @@ const closeRow = (rowMap, rowKey) => {
   }
 };
 
-const ImportantTask = ({navigation, reduxDeleteTask, reduxMarkTaskAsDone}) => {
+const ImportantTask = ({navigation}) => {
+  const dispatch = useDispatch;
   const todos = useSelector(state => state.taskReducer);
   const users = useSelector(state => state.authReducer);
   var loggedUser;
   let k = 0;
+  let i = 0,
+    j = 0,
+    l = 0;
+  let userTask = [],
+    userUndone = [],
+    userImportant = [];
   for (k in users) {
     if (users[k].loggedIn) {
+      console.log(users[k]);
       loggedUser = users[k].username;
       break;
     }
+    console.log(loggedUser);
   }
-  let userTask = [],
-    userUndone = [];
-  let i = 0,
-    j = 0;
   for (i in todos) {
     todos[i].user === loggedUser ? userTask.push(todos[i]) : null;
   }
+  console.log('User task: ', userTask);
   for (j in userTask) {
-    !userTask[j].completed && userTask.important
-      ? userUndone.push(userTask[j])
-      : null;
+    !userTask[j].completed ? userUndone.push(userTask[j]) : null;
   }
-  if (userUndone.length === 0) {
+  console.log('Undone task: ', userUndone);
+  for (l in userUndone) {
+    userUndone[l].important ? userImportant.push(userUndone[l]) : null;
+  }
+  console.log(userImportant);
+  if (userImportant.length === 0) {
     return (
       <View style={styles.container}>
         <View style={styles.titleContainer}>
@@ -63,11 +68,11 @@ const ImportantTask = ({navigation, reduxDeleteTask, reduxMarkTaskAsDone}) => {
     <View style={styles.container}>
       <View style={styles.taskCountContainer}>
         <Text style={{textAlign: 'right'}}>
-          You have {userUndone.length} important task
+          You have {userImportant.length} important task
         </Text>
       </View>
       <SwipeListView
-        data={userUndone}
+        data={userImportant}
         renderItem={({item}) => (
           <TouchableHighlight
             style={[
@@ -103,7 +108,7 @@ const ImportantTask = ({navigation, reduxDeleteTask, reduxMarkTaskAsDone}) => {
               style={styles.backLeftBtn}
               onPress={() => {
                 closeRow(rowMap, rowKey);
-                reduxMarkTaskAsDone(item.id);
+                dispatch(markAsDone(item.id));
               }}>
               {item.completed ? <Text>Undone</Text> : <Text>Done</Text>}
             </TouchableOpacity>
@@ -111,7 +116,7 @@ const ImportantTask = ({navigation, reduxDeleteTask, reduxMarkTaskAsDone}) => {
             <TouchableOpacity
               style={styles.backRightBtn}
               onPress={() => {
-                reduxDeleteTask(item.id);
+                dispatch(deleteTask(item.id));
               }}>
               <Text>Delete</Text>
             </TouchableOpacity>
@@ -262,4 +267,4 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ImportantTask);
+export default connect()(ImportantTask);

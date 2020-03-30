@@ -30,13 +30,11 @@ const CreateTask = ({navigation, reduxCreateTask}) => {
   var loggedUser,
     i = 0;
   for (i in users) {
-    console.log(users[i]);
     if (users[i].loggedIn) {
       loggedUser = users[i].username;
       break;
     }
   }
-  console.log(loggedUser);
 
   return (
     <ScrollView style={styles.container}>
@@ -113,7 +111,6 @@ const CreateTask = ({navigation, reduxCreateTask}) => {
                 endDate,
                 important,
               );
-              console.log(loggedUser);
               navigation.goBack();
             }}
           />
